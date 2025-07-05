@@ -35,6 +35,7 @@
       min-width: 200px;
       max-height: 300px;
       overflow-y: auto;
+      text-align: right;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     .countdown, .draw-countdown {
@@ -46,21 +47,28 @@
     #roulette {
       font-size: 28px;
       margin: 30px auto;
-      height: 50px;
+      height: 60px;
       width: 300px;
+      border-radius: 10px;
+      border: 4px solid #e67e22;
+      background: #fff;
       overflow: hidden;
       position: relative;
-      border: 2px dashed #aaa;
-      background: #f0f0f0;
     }
-    #roulette span {
+    #spin {
       position: absolute;
       width: 100%;
-      animation: spin 5s linear infinite;
+      top: 0;
+      height: 100%;
+      line-height: 60px;
+      color: #2c3e50;
+      font-weight: bold;
+      font-size: 24px;
+      animation: rouletteRoll 0.1s linear infinite;
     }
-    @keyframes spin {
-      0% { top: 100%; }
-      100% { top: -100%; }
+    @keyframes rouletteRoll {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-100%); }
     }
     .winner-box {
       margin-top: 40px;
@@ -89,7 +97,7 @@
   </div>
 
   <div class="draw-countdown hidden" id="draw-timer"></div>
-  <div id="roulette"></div>
+  <div id="roulette"><span id="spin">🎰 جاري تدوير الأسماء...</span></div>
   <div class="winner-box hidden" id="winner-box"></div>
 
   <script>
@@ -98,6 +106,7 @@
     const participantList = document.getElementById("participant-list");
     const participantCount = document.getElementById("participant-count");
     const roulette = document.getElementById("roulette");
+    const spin = document.getElementById("spin");
     const winnerBox = document.getElementById("winner-box");
 
     let participants = [];
@@ -145,10 +154,9 @@
 
     let spinInterval;
     function startRoulette() {
-      roulette.innerHTML = '<span id="spin">🎰 جاري تدوير الأسماء...</span>';
       spinInterval = setInterval(() => {
         const name = participants[Math.floor(Math.random() * participants.length)];
-        document.getElementById("spin").textContent = name;
+        spin.textContent = name;
       }, 100);
     }
 
@@ -163,9 +171,8 @@
     // --- نقطة البداية ---
     loadParticipants();
 
-    // حدد وقت بداية القرعة (عدله حسب الوقت الحقيقي)
-    const drawStartTime = new Date();
-    drawStartTime.setMinutes(drawStartTime.getMinutes() + 1); // تبدأ بعد دقيقة
+    // 🕒 عدّل هنا توقيت بداية القرعة حسب التاريخ والوقت
+    const drawStartTime = new Date("2025-07-05T17:00:00+03:00");
     startInitialCountdown(drawStartTime.getTime());
   </script>
 </body>
