@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json'); // هذا مهم جدًا
-
+header('Content-Type: application/json');
 $conn = new mysqli("sql304.infinityfree.com", "if0_39393071", "YjlT8G8HtGbMEC", "if0_39393071_draw_app");
 $conn->set_charset("utf8");
 
@@ -11,5 +10,5 @@ while ($row = $result->fetch_assoc()) {
   $names[] = $row['name'];
 }
 
-echo json_encode($names); // ترجع JSON بدل نص
+echo json_encode($names);
 ?>
