@@ -57,11 +57,15 @@
 
 
 .name-strip {
-  font-size: 4em;              /* حجم ضخم للاسم */
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-size: 3em; /* حجم كبير وواضح */
+  top: 50%;
+  transform: translateY(-50%);
   color: white;
-  animation: none;             /* لا تستخدم animation هنا بل تحكم عبر JS */
-  white-space: nowrap;
 }
+
 
     @keyframes spin {
       0% { top: 100%; }
