@@ -1,23 +1,13 @@
 <?php
-$host = "127.0.0.1";
-$db = "draw";
-$user = "root";
-$pass = "Abdos270";
+$drawTime = strtotime("2025-07-06 20:00:00"); // ← عدل وقت بداية القرعة هنا
+$now = time();
 
-// الاتصال
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-  die("فشل الاتصال: " . $conn->connect_error);
-}
-
-// جلب معلومات القرعة
-$sql = "SELECT draw_time, winner_name, status FROM lottery WHERE id = 1";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-  echo json_encode($result->fetch_assoc());
+if (file_exists("winner.txt")) {
+    $winner = file_get_contents("winner.txt");
+    echo json_encode(["status" => "done", "winner" => $winner]);
 } else {
-  echo json_encode(["error" => "لم يتم العثور على قرعة"]);
+    echo json_encode([
+        "status" => "pending",
+        "draw_time" => date("Y-m-d H:i:s", $drawTime)
+    ]);
 }
-$conn->close();
-?>
