@@ -116,9 +116,7 @@
         if (data.name) {
           winner = data.name;
         }
-      } catch {
-        // تجاهل الخطأ
-      }
+      } catch {}
     }
 
     async function loadParticipants() {
@@ -207,12 +205,12 @@
       showWinner(name);
     }
 
-    // التشغيل
     loadWinner().then(() => {
       loadParticipants().then(() => {
         fetchDrawTime().then(startInitialCountdown);
       });
     });
   </script>
+
 </body>
 </html>
