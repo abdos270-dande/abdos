@@ -100,7 +100,8 @@
 
   <div class="timer hidden" id="draw-timer" style="display: none;"></div>
 
-  <div class="machine">
+  <!-- آلة القرعة مخفية مبدئيًا -->
+  <div class="machine hidden" id="roulette-machine">
     <div class="name-strip" id="spinning-name">🔄</div>
   </div>
 
@@ -114,6 +115,7 @@
     const participantsSection = document.getElementById("participants-section");
     const participantCount = document.getElementById("participant-count");
     const participantList = document.getElementById("participant-list");
+    const rouletteMachine = document.getElementById("roulette-machine");
 
     let participants = [];
 
@@ -141,7 +143,9 @@
           initialTimer.textContent = "🎯 جاري بدء القرعة بعد 5 دقائق...";
           participantsSection.classList.add("hidden");
 
-          drawTimer.style.display = "block";  // 👈 إظهار العداد
+          // إظهار آلة القرعة بعد بدء الوقت
+          rouletteMachine.classList.remove("hidden");
+          drawTimer.style.display = "block";
           drawTimer.classList.remove("hidden");
 
           startDrawCountdown(5 * 60);
@@ -194,7 +198,7 @@
       }, delay);
     }
 
-    // 🔄 البداية
+    // بدء التحميل
     loadParticipants();
     fetchDrawTime().then(startInitialCountdown);
   </script>
