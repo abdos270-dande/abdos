@@ -40,9 +40,9 @@
       max-height: 200px;
       overflow-y: auto;
     }
-   .machine {
-  width: 90%;
-  height: 150px;
+  .machine {
+  width: 95vw;              /* عرض تقريبي يعادل عرض الشاشة */
+  height: 50vh;             /* نصف ارتفاع الشاشة */
   margin: 30px auto;
   background: #222;
   border: 5px solid gold;
@@ -50,17 +50,19 @@
   overflow: hidden;
   position: relative;
   box-shadow: 0 0 30px gold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+
 .name-strip {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  font-size: 51em; /* تم تكبيره 3 أضعاف */
-  top: 50%;
-  transform: translateY(-50%);
+  font-size: 4em;              /* حجم ضخم للاسم */
   color: white;
+  animation: none;             /* لا تستخدم animation هنا بل تحكم عبر JS */
+  white-space: nowrap;
 }
+
     @keyframes spin {
       0% { top: 100%; }
       100% { top: -100%; }
