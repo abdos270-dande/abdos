@@ -26,7 +26,7 @@
       if (data.status === "done") {
         timerEl.style.display = "none";
         resultEl.classList.remove("hidden");
-        resultEl.textContent = `الفائز هو: ${data.winner_name}`;
+        resultEl.textContent = `🎉 الفائز هو: ${data.winner}`;
       } else if (data.status === "pending") {
         const drawTime = new Date(data.draw_time).getTime();
         startCountdown(drawTime);
@@ -40,20 +40,20 @@
 
         if (diff <= 0) {
           clearInterval(timer);
-          timerEl.textContent = "جاري اختيار الفائز...";
+          timerEl.textContent = "🔄 جاري اختيار الفائز...";
           const res = await fetch("/pick_winner.php");
           const result = await res.json();
           if (result.status === "success") {
             resultEl.classList.remove("hidden");
-            resultEl.textContent = `الفائز هو: ${result.winner}`;
+            resultEl.textContent = `🎉 الفائز هو: ${result.winner}`;
             timerEl.style.display = "none";
           } else {
-            resultEl.textContent = "جاري التحضير للنتيجة...";
+            resultEl.textContent = "❌ حدث خطأ أثناء الاختيار.";
           }
         } else {
           const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const secs = Math.floor((diff % (1000 * 60)) / 1000);
-          timerEl.textContent = `تبقى على بداية القرعة: ${mins} دقيقة و ${secs} ثانية`;
+          timerEl.textContent = `⏳ تبقى على بداية القرعة: ${mins} دقيقة و ${secs} ثانية`;
         }
       }, 1000);
     }
