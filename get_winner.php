@@ -1,13 +1,6 @@
 <?php
-header("Content-Type: application/json");
-
-if (file_exists("winner.txt")) {
-  $winner = trim(file_get_contents("winner.txt"));
-  if ($winner !== "") {
-    echo json_encode(["winner" => $winner]);
-  } else {
-    echo json_encode(["winner" => null]);
-  }
-} else {
-  echo json_encode(["winner" => null]);
-}
+$conn = new mysqli("sql304.infinityfree.com", "if0_39393071", "YjlT8G8HtGbMEC", "if0_39393071_draw_app");
+$result = $conn->query("SELECT name FROM winner WHERE id = 1");
+$row = $result->fetch_assoc();
+echo $row ? $row["name"] : "";
+?>
