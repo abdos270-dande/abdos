@@ -1,5 +1,5 @@
 <?php
-$drawTime = strtotime("2025-07-06 20:00:00"); // ← عدل وقت بداية القرعة هنا
+$drawTime = strtotime("2025-07-05 12:00:00"); // ← عدل وقت بداية القرعة هنا
 $now = time();
 
 if (file_exists("winner.txt")) {
