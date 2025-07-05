@@ -1,45 +1,64 @@
-<script>
-  const timerEl = document.getElementById("timer");
-  const resultEl = document.getElementById("result");
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>القرعة</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 40px; direction: rtl; }
+    .winner { background: gold; padding: 30px; font-size: 2em; margin-top: 20px; }
+    .countdown { font-size: 24px; margin: 10px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>قرعة اليوم</h1>
+  <div class="countdown" id="timer">تحميل...</div>
+  <div id="result" class="winner hidden"></div>
 
-  async function fetchStatus() {
-    const res = await fetch("http://192.168.0.128/sas/lottery_status.php");
-    const data = await res.json();
+  <script>
+    const timerEl = document.getElementById("timer");
+    const resultEl = document.getElementById("result");
 
-    if (data.status === "done") {
-      timerEl.style.display = "none";
-      resultEl.classList.remove("hidden");
-      resultEl.textContent = `الفائز هو: ${data.winner_name}`;
-    } else if (data.status === "pending") {
-      const drawTime = new Date(data.draw_time).getTime();
-      startCountdown(drawTime);
-    }
-  }
+    async function fetchStatus() {
+      const res = await fetch("/lottery_status.php");
+      const data = await res.json();
 
-  function startCountdown(targetTime) {
-    const timer = setInterval(async () => {
-      const now = new Date().getTime();
-      const diff = targetTime - now;
-
-      if (diff <= 0) {
-        clearInterval(timer);
-        timerEl.textContent = "جاري اختيار الفائز...";
-        const res = await fetch("http://192.168.0.128/sas/pick_winner.php");
-        const result = await res.json();
-        if (result.status === "success") {
-          resultEl.classList.remove("hidden");
-          resultEl.textContent = `الفائز هو: ${result.winner}`;
-          timerEl.style.display = "none";
-        } else {
-          resultEl.textContent = "جاري التحضير للنتيجة...";
-        }
-      } else {
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
-        timerEl.textContent = `تبقى على بداية القرعة: ${mins} دقيقة و ${secs} ثانية`;
+      if (data.status === "done") {
+        timerEl.style.display = "none";
+        resultEl.classList.remove("hidden");
+        resultEl.textContent = `الفائز هو: ${data.winner_name}`;
+      } else if (data.status === "pending") {
+        const drawTime = new Date(data.draw_time).getTime();
+        startCountdown(drawTime);
       }
-    }, 1000);
-  }
+    }
 
-  fetchStatus();
-</script>
+    function startCountdown(targetTime) {
+      const timer = setInterval(async () => {
+        const now = new Date().getTime();
+        const diff = targetTime - now;
+
+        if (diff <= 0) {
+          clearInterval(timer);
+          timerEl.textContent = "جاري اختيار الفائز...";
+          const res = await fetch("/pick_winner.php");
+          const result = await res.json();
+          if (result.status === "success") {
+            resultEl.classList.remove("hidden");
+            resultEl.textContent = `الفائز هو: ${result.winner}`;
+            timerEl.style.display = "none";
+          } else {
+            resultEl.textContent = "جاري التحضير للنتيجة...";
+          }
+        } else {
+          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+          timerEl.textContent = `تبقى على بداية القرعة: ${mins} دقيقة و ${secs} ثانية`;
+        }
+      }, 1000);
+    }
+
+    fetchStatus();
+  </script>
+</body>
+</html>
