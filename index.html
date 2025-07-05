@@ -40,25 +40,27 @@
       max-height: 200px;
       overflow-y: auto;
     }
-    .machine {
-      width: 300px;
-      height: 80px;
-      margin: 30px auto;
-      background: #222;
-      border: 5px solid gold;
-      border-radius: 15px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 0 30px gold;
-    }
-    .name-strip {
-      position: absolute;
-      width: 100%;
-      text-align: center;
-      font-size: 1.5em;
-      color: white;
-      animation: spin 0.2s linear infinite;
-    }
+   .machine {
+  width: 90%;
+  height: 150px;
+  margin: 30px auto;
+  background: #222;
+  border: 5px solid gold;
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 30px gold;
+}
+
+.name-strip {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-size: 3em; /* تم تكبيره 3 أضعاف */
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+}
     @keyframes spin {
       0% { top: 100%; }
       100% { top: -100%; }
