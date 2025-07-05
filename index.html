@@ -65,9 +65,9 @@
       width: 100%;
       text-align: center;
       font-size: 3em;
-      color: white;
       top: 50%;
       transform: translateY(-50%);
+      color: white;
     }
 
     .winner-box {
@@ -87,16 +87,20 @@
 <body>
 
   <div class="header">🎉 مرحبًا بكم مع العناني 🎉</div>
-  <div class="timer" id="initial-timer"></div>
+  <div class="timer" id="initial-timer">تحميل الوقت...</div>
 
   <div class="section" id="participants-section">
-    <div class="box">📋 عدد المشاركين: <span id="participant-count">0</span></div>
-    <div class="box" id="participant-list">👥 أسماء المشاركين:</div>
+    <div class="box">
+      📋 عدد المشاركين: <span id="participant-count">0</span>
+    </div>
+    <div class="box" id="participant-list">
+      👥 أسماء المشاركين:
+    </div>
   </div>
 
   <div class="timer hidden" id="draw-timer"></div>
 
-  <div class="machine">
+  <div class="machine hidden" id="roulette-machine">
     <div class="name-strip" id="spinning-name">🔄</div>
   </div>
 
@@ -110,9 +114,9 @@
     const participantsSection = document.getElementById("participants-section");
     const participantCount = document.getElementById("participant-count");
     const participantList = document.getElementById("participant-list");
+    const rouletteMachine = document.getElementById("roulette-machine");
 
     let participants = [];
-    let winnerAlready = null;
 
     async function getWinner() {
       const res = await fetch("get_winner.php");
@@ -120,12 +124,10 @@
       return data.winner;
     }
 
-    async function saveWinner(winner) {
-      await fetch("save_winner.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ winner })
-      });
+    async function fetchDrawTime() {
+      const res = await fetch("draw_config.php");
+      const data = await res.json();
+      return new Date(data.start_time).getTime();
     }
 
     async function loadParticipants() {
@@ -136,28 +138,28 @@
       participantList.innerHTML += "<ul>" + participants.map(n => `<li>${n}</li>`).join("") + "</ul>";
     }
 
-    async function fetchDrawTime() {
-      const res = await fetch("draw_config.php");
-      const data = await res.json();
-      return new Date(data.start_time).getTime();
+    function showWinner(winnerName) {
+      participantsSection.classList.add("hidden");
+      drawTimer.classList.add("hidden");
+      rouletteMachine.classList.add("hidden");
+      initialTimer.classList.add("hidden");
+      winnerBox.style.display = "block";
+      winnerBox.textContent = `🎉 الفائز هو: ${winnerName}`;
     }
 
     function startInitialCountdown(targetTime) {
-      const interval = setInterval(() => {
-        const now = Date.now();
+      const timer = setInterval(() => {
+        const now = new Date().getTime();
         const diff = targetTime - now;
 
         if (diff <= 0) {
-          clearInterval(interval);
+          clearInterval(timer);
           initialTimer.textContent = "🎯 جاري بدء القرعة بعد 5 دقائق...";
           participantsSection.classList.add("hidden");
+          rouletteMachine.classList.remove("hidden");
           drawTimer.classList.remove("hidden");
-
-          // فقط إذا لم يتم اختيار فائز
-          if (!winnerAlready) {
-            startDrawCountdown(5 * 60);
-            startRoulette();
-          }
+          startDrawCountdown(5 * 60);
+          startRoulette();
         } else {
           const mins = Math.floor(diff / (1000 * 60));
           const secs = Math.floor((diff % (1000 * 60)) / 1000);
@@ -180,49 +182,45 @@
       }, 1000);
     }
 
-    let spinInterval;
+    let spinningInterval;
     function startRoulette() {
       let index = 0;
-      spinInterval = setInterval(() => {
+      spinningInterval = setInterval(() => {
         spinningName.textContent = participants[index % participants.length];
         index++;
       }, 100);
     }
 
-    async function stopRouletteAndShowWinner() {
-      clearInterval(spinInterval);
+    function stopRouletteAndShowWinner() {
+      clearInterval(spinningInterval);
       let i = Math.floor(Math.random() * participants.length);
       let delay = 150;
-      const slowdown = setInterval(() => {
+      const slowDown = setInterval(() => {
         spinningName.textContent = participants[i % participants.length];
         i++;
         delay += 100;
         if (delay > 2000) {
-          clearInterval(slowdown);
+          clearInterval(slowDown);
           const winner = participants[(i - 1) % participants.length];
-          winnerBox.style.display = "block";
-          winnerBox.textContent = `🎉 الفائز هو: ${winner}`;
-          await saveWinner(winner);
+          fetch("save_winner.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ winner })
+          });
+          showWinner(winner);
         }
       }, delay);
     }
 
-    // البداية
-    (async function () {
-      winnerAlready = await getWinner();
-      if (winnerAlready) {
-        document.getElementById("initial-timer").textContent = "🎊 القرعة انتهت";
-        participantsSection.classList.add("hidden");
-        spinningName.textContent = "";
-        winnerBox.style.display = "block";
-        winnerBox.textContent = `🎉 الفائز هو: ${winnerAlready}`;
-        return;
+    // ✅ البداية
+    loadParticipants();
+    Promise.all([fetchDrawTime(), getWinner()]).then(([drawTime, winner]) => {
+      if (winner) {
+        showWinner(winner);
+      } else {
+        startInitialCountdown(drawTime);
       }
-
-      await loadParticipants();
-      const drawStartTime = await fetchDrawTime();
-      startInitialCountdown(drawStartTime);
-    })();
+    });
   </script>
 </body>
 </html>
