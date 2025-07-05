@@ -12,6 +12,7 @@
       direction: rtl;
       padding: 20px;
     }
+
     .header {
       background: linear-gradient(to right, gold, orange);
       padding: 20px;
@@ -21,17 +22,20 @@
       box-shadow: 0 0 20px gold;
       margin-bottom: 30px;
     }
+
     .timer {
       margin: 10px 0;
       font-size: 1.5em;
       color: gold;
     }
+
     .section {
       display: flex;
       justify-content: center;
       gap: 40px;
       margin-bottom: 30px;
     }
+
     .box {
       background: #111;
       border: 2px solid gold;
@@ -40,37 +44,32 @@
       max-height: 200px;
       overflow-y: auto;
     }
-  .machine {
-  width: 95vw;              /* عرض تقريبي يعادل عرض الشاشة */
-  height: 50vh;             /* نصف ارتفاع الشاشة */
-  margin: 30px auto;
-  background: #222;
-  border: 5px solid gold;
-  border-radius: 15px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 0 30px gold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-
-.name-strip {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  font-size: 3em; /* حجم كبير وواضح */
-  top: 50%;
-  transform: translateY(-50%);
-  color: white;
-}
-
-
-    @keyframes spin {
-      0% { top: 100%; }
-      100% { top: -100%; }
+    .machine {
+      width: 95vw;
+      height: 50vh;
+      margin: 30px auto;
+      background: #222;
+      border: 5px solid gold;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 30px gold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
+    .name-strip {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      font-size: 3em;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+    }
+
     .winner-box {
       margin-top: 30px;
       font-size: 2em;
@@ -81,6 +80,7 @@
       box-shadow: 0 0 20px gold;
       display: none;
     }
+
     .hidden { display: none; }
   </style>
 </head>
@@ -98,7 +98,7 @@
     </div>
   </div>
 
-  <div class="timer hidden" id="draw-timer"></div>
+  <div class="timer hidden" id="draw-timer" style="display: none;"></div>
 
   <div class="machine">
     <div class="name-strip" id="spinning-name">🔄</div>
@@ -140,7 +140,10 @@
           clearInterval(timer);
           initialTimer.textContent = "🎯 جاري بدء القرعة بعد 5 دقائق...";
           participantsSection.classList.add("hidden");
+
+          drawTimer.style.display = "block";  // 👈 إظهار العداد
           drawTimer.classList.remove("hidden");
+
           startDrawCountdown(5 * 60);
           startRoulette();
         } else {
