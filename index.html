@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
@@ -35,7 +36,6 @@
       min-width: 200px;
       max-height: 300px;
       overflow-y: auto;
-      text-align: right;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     .countdown, .draw-countdown {
@@ -48,27 +48,25 @@
       font-size: 28px;
       margin: 30px auto;
       height: 60px;
-      width: 300px;
-      border-radius: 10px;
-      border: 4px solid #e67e22;
-      background: #fff;
+      width: 80%;
       overflow: hidden;
       position: relative;
+      border: 3px solid gold;
+      background: #fff3cd;
+      display: none;
+      box-shadow: 0 0 15px orange;
     }
-    #spin {
+    #roulette span {
       position: absolute;
       width: 100%;
-      top: 0;
-      height: 100%;
-      line-height: 60px;
-      color: #2c3e50;
+      white-space: nowrap;
+      animation: spin 2s linear infinite;
       font-weight: bold;
-      font-size: 24px;
-      animation: rouletteRoll 0.1s linear infinite;
+      color: #b03a2e;
     }
-    @keyframes rouletteRoll {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-100%); }
+    @keyframes spin {
+      0% { left: 100%; }
+      100% { left: -100%; }
     }
     .winner-box {
       margin-top: 40px;
@@ -79,13 +77,14 @@
       font-weight: bold;
       color: #c0392b;
       box-shadow: 0 0 30px gold;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="header">مرحبًا بكم مع العناني 🎉</div>
+  <div class="header">🎉 مرحبًا بكم مع العناني 🎉</div>
   <div class="countdown" id="initial-timer">جاري تحميل الوقت المتبقي...</div>
-  <div class="section">
+  <div class="section" id="info-section">
     <div class="box">
       <div><strong>📋 عدد المشاركين:</strong></div>
       <div id="participant-count">0</div>
@@ -97,8 +96,8 @@
   </div>
 
   <div class="draw-countdown hidden" id="draw-timer"></div>
-  <div id="roulette"><span id="spin">🎰 جاري تدوير الأسماء...</span></div>
-  <div class="winner-box hidden" id="winner-box"></div>
+  <div id="roulette"><span id="spin">🎰</span></div>
+  <div class="winner-box" id="winner-box"></div>
 
   <script>
     const initialTimer = document.getElementById("initial-timer");
@@ -106,8 +105,9 @@
     const participantList = document.getElementById("participant-list");
     const participantCount = document.getElementById("participant-count");
     const roulette = document.getElementById("roulette");
-    const spin = document.getElementById("spin");
+    const spinSpan = document.getElementById("spin");
     const winnerBox = document.getElementById("winner-box");
+    const infoSection = document.getElementById("info-section");
 
     let participants = [];
 
@@ -129,6 +129,8 @@
           initialTimer.textContent = "⏱️ جاري بدء القرعة بعد 5 دقائق...";
           startDrawCountdown(5 * 60);
           startRoulette();
+          infoSection.style.display = "none";
+          roulette.style.display = "block";
         } else {
           const mins = Math.floor(diff / (1000 * 60));
           const secs = Math.floor((diff % (1000 * 60)) / 1000);
@@ -156,22 +158,19 @@
     function startRoulette() {
       spinInterval = setInterval(() => {
         const name = participants[Math.floor(Math.random() * participants.length)];
-        spin.textContent = name;
-      }, 100);
+        spinSpan.textContent = name;
+      }, 80);
     }
 
     function stopRouletteAndPickWinner() {
       clearInterval(spinInterval);
       const winner = participants[Math.floor(Math.random() * participants.length)];
-      roulette.innerHTML = "";
-      winnerBox.classList.remove("hidden");
+      roulette.style.display = "none";
+      winnerBox.style.display = "block";
       winnerBox.textContent = `🎉 الفائز هو: ${winner}`;
     }
 
-    // --- نقطة البداية ---
     loadParticipants();
-
-    // 🕒 عدّل هنا توقيت بداية القرعة حسب التاريخ والوقت
     const drawStartTime = new Date("2025-07-05T17:00:00+03:00");
     startInitialCountdown(drawStartTime.getTime());
   </script>
