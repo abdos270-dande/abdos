@@ -10,6 +10,7 @@
       color: #fff;
       text-align: center;
       direction: rtl;
+      padding: 20px;
     }
     .header {
       background: linear-gradient(to right, gold, orange);
@@ -18,81 +19,108 @@
       font-weight: bold;
       color: #000;
       box-shadow: 0 0 20px gold;
+      margin-bottom: 30px;
     }
     .timer {
-      margin: 20px 0;
+      margin: 10px 0;
       font-size: 1.5em;
       color: gold;
     }
+    .section {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+    .box {
+      background: #111;
+      border: 2px solid gold;
+      border-radius: 10px;
+      padding: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
     .machine {
       width: 300px;
-      height: 150px;
-      margin: 0 auto;
+      height: 80px;
+      margin: 30px auto;
       background: #222;
       border: 5px solid gold;
-      border-radius: 10px;
+      border-radius: 15px;
       overflow: hidden;
       position: relative;
       box-shadow: 0 0 30px gold;
     }
-    .names {
+    .name-strip {
       position: absolute;
       width: 100%;
-      animation: scroll 2s linear infinite;
       text-align: center;
       font-size: 1.5em;
       color: white;
+      animation: spin 0.2s linear infinite;
     }
-    @keyframes scroll {
+    @keyframes spin {
       0% { top: 100%; }
       100% { top: -100%; }
     }
     .winner-box {
-      margin-top: 40px;
+      margin-top: 30px;
       font-size: 2em;
-      color: #000;
       background: gold;
+      color: #000;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px gold;
       display: none;
     }
-    .hide-on-draw { display: block; }
     .hidden { display: none; }
   </style>
 </head>
 <body>
+
   <div class="header">🎉 مرحبًا بكم مع العناني 🎉</div>
-  <div class="timer" id="initial-timer">تحميل الوقت المتبقي...</div>
-  <div class="section hide-on-draw" id="participant-info">
-    <p>📋 عدد المشاركين: <span id="participant-count">0</span></p>
-    <p>👥 أسماء المشاركين:</p>
-    <div id="participant-list"></div>
+  <div class="timer" id="initial-timer">تحميل الوقت...</div>
+
+  <div class="section" id="participants-section">
+    <div class="box">
+      📋 عدد المشاركين: <span id="participant-count">0</span>
+    </div>
+    <div class="box" id="participant-list">
+      👥 أسماء المشاركين:
+    </div>
   </div>
+
   <div class="timer hidden" id="draw-timer"></div>
-  <div class="machine" id="roulette">
-    <div class="names" id="spinning-names">جاري تحميل الأسماء...</div>
+
+  <div class="machine">
+    <div class="name-strip" id="spinning-name">🔄</div>
   </div>
+
   <div class="winner-box" id="winner-box"></div>
 
   <script>
     const initialTimer = document.getElementById("initial-timer");
     const drawTimer = document.getElementById("draw-timer");
-    const participantList = document.getElementById("participant-list");
-    const participantCount = document.getElementById("participant-count");
-    const spinningNames = document.getElementById("spinning-names");
-    const roulette = document.getElementById("roulette");
+    const spinningName = document.getElementById("spinning-name");
     const winnerBox = document.getElementById("winner-box");
-    const infoBox = document.getElementById("participant-info");
+    const participantsSection = document.getElementById("participants-section");
+    const participantCount = document.getElementById("participant-count");
+    const participantList = document.getElementById("participant-list");
 
     let participants = [];
+
+    async function fetchDrawTime() {
+      const res = await fetch("draw_config.php");
+      const data = await res.json();
+      return new Date(data.start_time).getTime();
+    }
 
     async function loadParticipants() {
       const res = await fetch("names.txt");
       const text = await res.text();
-      participants = text.split("\n").filter(n => n.trim() !== "");
+      participants = text.trim().split("\n");
       participantCount.textContent = participants.length;
-      participantList.innerHTML = participants.map(n => `<div>${n}</div>`).join("");
+      participantList.innerHTML += "<ul>" + participants.map(n => `<li>${n}</li>`).join("") + "</ul>";
     }
 
     function startInitialCountdown(targetTime) {
@@ -102,8 +130,8 @@
 
         if (diff <= 0) {
           clearInterval(timer);
-          initialTimer.textContent = "⏱️ جاري بدء القرعة بعد 5 دقائق...";
-          infoBox.classList.add("hidden");
+          initialTimer.textContent = "🎯 جاري بدء القرعة بعد 5 دقائق...";
+          participantsSection.classList.add("hidden");
           drawTimer.classList.remove("hidden");
           startDrawCountdown(5 * 60);
           startRoulette();
@@ -124,43 +152,40 @@
         s--;
         if (s < 0) {
           clearInterval(interval);
-          stopRouletteAndPickWinner();
+          stopRouletteAndShowWinner();
         }
       }, 1000);
     }
 
-    let slowInterval;
+    let spinningInterval;
     function startRoulette() {
       let index = 0;
-      spinningNames.style.animation = "scroll 0.1s linear infinite";
-      slowInterval = setInterval(() => {
-        spinningNames.textContent = participants[index % participants.length];
+      spinningInterval = setInterval(() => {
+        spinningName.textContent = participants[index % participants.length];
         index++;
       }, 100);
     }
 
-    function stopRouletteAndPickWinner() {
-      clearInterval(slowInterval);
-      let index = Math.floor(Math.random() * participants.length);
-      let slowdown = 200;
-      const slowdownInterval = setInterval(() => {
-        spinningNames.textContent = participants[index % participants.length];
-        index++;
-        slowdown += 100;
-        if (slowdown > 2000) {
-          clearInterval(slowdownInterval);
-          const winner = participants[(index - 1) % participants.length];
+    function stopRouletteAndShowWinner() {
+      clearInterval(spinningInterval);
+      let i = Math.floor(Math.random() * participants.length);
+      let delay = 150;
+      const slowDown = setInterval(() => {
+        spinningName.textContent = participants[i % participants.length];
+        i++;
+        delay += 100;
+        if (delay > 2000) {
+          clearInterval(slowDown);
+          const winner = participants[(i - 1) % participants.length];
           winnerBox.style.display = "block";
           winnerBox.textContent = `🎉 الفائز هو: ${winner}`;
         }
-      }, slowdown);
+      }, delay);
     }
 
-    // وقت بداية القرعة
-    const drawStartTime = new Date("2025-07-05T17:00:00+03:00");
-
+    // 🔄 البداية
     loadParticipants();
-    startInitialCountdown(drawStartTime.getTime());
+    fetchDrawTime().then(startInitialCountdown);
   </script>
 </body>
 </html>
