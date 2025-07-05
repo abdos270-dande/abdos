@@ -1,219 +1,118 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8" />
-  <title>قرعة العناني</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background: #000;
-      color: #fff;
-      text-align: center;
-      direction: rtl;
-      padding: 20px;
-    }
-    .header {
-      background: linear-gradient(to right, gold, orange);
-      padding: 20px;
-      font-size: 2em;
-      font-weight: bold;
-      color: #000;
-      box-shadow: 0 0 20px gold;
-      margin-bottom: 30px;
-    }
-    .timer {
-      margin: 10px 0;
-      font-size: 1.8em;
-      color: gold;
-    }
-    .section {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin-bottom: 30px;
-    }
-    .box {
-      background: #111;
-      border: 2px solid gold;
-      border-radius: 10px;
-      padding: 20px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .machine {
-      width: 95vw;
-      height: 50vh;
-      margin: 30px auto;
-      background: #222;
-      border: 5px solid gold;
-      border-radius: 15px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 0 30px gold;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    .name-strip {
-      position: absolute;
-      width: 100%;
-      text-align: center;
-      font-size: 3em;
-      top: 50%;
-      transform: translateY(-50%);
-      color: white;
-    }
-    .winner-box {
-      margin-top: 30px;
-      font-size: 2.2em;
-      background: gold;
-      color: #000;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px gold;
-      display: none;
-    }
-    .hidden { display: none; }
-  </style>
-</head>
-<body>
+<script>
+  const initialTimer = document.getElementById("initial-timer");
+  const drawTimer = document.getElementById("draw-timer");
+  const spinningName = document.getElementById("spinning-name");
+  const winnerBox = document.getElementById("winner-box");
+  const participantsSection = document.getElementById("participants-section");
+  const participantCount = document.getElementById("participant-count");
+  const participantList = document.getElementById("participant-list");
+  const rouletteMachine = document.getElementById("roulette-machine");
 
-  <div class="header">🎉 مرحبًا بكم مع العناني 🎉</div>
-  <div class="timer" id="initial-timer">تحميل الوقت...</div>
+  let participants = [];
+  let winner = null;
 
-  <div class="section" id="participants-section">
-    <div class="box">
-      📋 عدد المشاركين: <span id="participant-count">0</span>
-    </div>
-    <div class="box" id="participant-list">
-      👥 أسماء المشاركين:
-    </div>
-  </div>
-
-  <div class="timer hidden" id="draw-timer"></div>
-  <div class="machine" id="roulette-machine">
-    <div class="name-strip" id="spinning-name">🔄</div>
-  </div>
-  <div class="winner-box" id="winner-box"></div>
-
-  <script>
-    const initialTimer = document.getElementById("initial-timer");
-    const drawTimer = document.getElementById("draw-timer");
-    const spinningName = document.getElementById("spinning-name");
-    const winnerBox = document.getElementById("winner-box");
-    const participantsSection = document.getElementById("participants-section");
-    const participantCount = document.getElementById("participant-count");
-    const participantList = document.getElementById("participant-list");
-    const rouletteMachine = document.getElementById("roulette-machine");
-
-    let participants = [];
-    let winner = null;
-
-    async function loadWinner() {
-      try {
-        const res = await fetch("winner.txt");
-        const name = await res.text();
-        if (name.trim()) {
-          winner = name.trim();
-        }
-      } catch {
-        // لا شيء
-      }
-    }
-
-    async function loadParticipants() {
-      const res = await fetch("names.txt");
-      const text = await res.text();
-      participants = text.trim().split("\n");
-      participantCount.textContent = participants.length;
-      participantList.innerHTML += "<ul>" + participants.map(n => `<li>${n}</li>`).join("") + "</ul>";
-    }
-
-    async function fetchDrawTime() {
-      const res = await fetch("draw_config.php");
+  async function loadWinner() {
+    try {
+      const res = await fetch("get_winner.php");
       const data = await res.json();
-      return new Date(data.start_time).getTime();
+      if (data.name) {
+        winner = data.name;
+      }
+    } catch {
+      // لا شيء
     }
+  }
 
-    function showWinner(name) {
-      rouletteMachine.style.display = "none";
-      drawTimer.classList.add("hidden");
-      initialTimer.classList.add("hidden");
-      winnerBox.style.display = "block";
-      winnerBox.textContent = `🎉 الفائز هو: ${name}`;
-    }
+  async function loadParticipants() {
+    const res = await fetch("get_participants.php");
+    const data = await res.json();
+    participants = data;
+    participantCount.textContent = participants.length;
+    participantList.innerHTML += "<ul>" + participants.map(n => `<li>${n}</li>`).join("") + "</ul>";
+  }
 
-    function startInitialCountdown(startTime) {
-      const drawEndTime = startTime + 5 * 60 * 1000; // بعد 5 دقائق من وقت البداية
-      const interval = setInterval(() => {
-        const now = Date.now();
+  async function fetchDrawTime() {
+    const res = await fetch("draw_config.php");
+    const data = await res.json();
+    return new Date(data.start_time).getTime();
+  }
 
-        if (winner) {
-          clearInterval(interval);
-          showWinner(winner);
-          return;
-        }
+  function showWinner(name) {
+    rouletteMachine.style.display = "none";
+    drawTimer.classList.add("hidden");
+    initialTimer.classList.add("hidden");
+    winnerBox.style.display = "block";
+    winnerBox.textContent = `🎉 الفائز هو: ${name}`;
+  }
 
-        if (now < startTime) {
-          const diff = startTime - now;
-          const mins = Math.floor(diff / 60000);
-          const secs = Math.floor((diff % 60000) / 1000);
-          initialTimer.textContent = `⏳ تبقى على بداية القرعة: ${mins} دقيقة و ${secs} ثانية`;
-        } else if (now < drawEndTime) {
-          const diff = drawEndTime - now;
-          const mins = Math.floor(diff / 60000);
-          const secs = Math.floor((diff % 60000) / 1000);
-          drawTimer.textContent = `🎲 القرعة تبدأ خلال: ${mins} دقيقة و ${secs} ثانية`;
-          initialTimer.classList.add("hidden");
-          drawTimer.classList.remove("hidden");
-          participantsSection.classList.add("hidden");
-          rouletteMachine.style.display = "flex";
-          startRoulette(drawEndTime);
-          clearInterval(interval);
-        } else {
-          // انتهى وقت القرعة لكن لم يتم إعلان فائز بعد
-          if (!winner) {
-            pickWinner();
-          } else {
-            showWinner(winner);
-            clearInterval(interval);
-          }
-        }
-      }, 1000);
-    }
+  function startInitialCountdown(startTime) {
+    const drawEndTime = startTime + 5 * 60 * 1000;
+    const interval = setInterval(() => {
+      const now = Date.now();
 
-    let spinningInterval;
+      if (winner) {
+        clearInterval(interval);
+        showWinner(winner);
+        return;
+      }
 
-    function startRoulette(endTime) {
-      let index = 0;
-      spinningInterval = setInterval(() => {
-        spinningName.textContent = participants[index % participants.length];
-        index++;
-        if (Date.now() >= endTime) {
-          clearInterval(spinningInterval);
+      if (now < startTime) {
+        const diff = startTime - now;
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        initialTimer.textContent = `⏳ تبقى على بداية القرعة: ${mins} دقيقة و ${secs} ثانية`;
+      } else if (now < drawEndTime) {
+        const diff = drawEndTime - now;
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        drawTimer.textContent = `🎲 القرعة تبدأ خلال: ${mins} دقيقة و ${secs} ثانية`;
+        initialTimer.classList.add("hidden");
+        drawTimer.classList.remove("hidden");
+        participantsSection.classList.add("hidden");
+        rouletteMachine.style.display = "flex";
+        startRoulette(drawEndTime);
+        clearInterval(interval);
+      } else {
+        if (!winner) {
           pickWinner();
+        } else {
+          showWinner(winner);
+          clearInterval(interval);
         }
-      }, 100);
-    }
+      }
+    }, 1000);
+  }
 
-    function pickWinner() {
-      const index = Math.floor(Math.random() * participants.length);
-      const name = participants[index];
-      winner = name;
-      fetch("save_winner.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ winner: name })
-      });
-      showWinner(name);
-    }
+  let spinningInterval;
 
-    // التشغيل
-    loadWinner().then(() => {
-      loadParticipants().then(() => {
-        fetchDrawTime().then(startInitialCountdown);
-      });
+  function startRoulette(endTime) {
+    let index = 0;
+    spinningInterval = setInterval(() => {
+      spinningName.textContent = participants[index % participants.length];
+      index++;
+      if (Date.now() >= endTime) {
+        clearInterval(spinningInterval);
+        pickWinner();
+      }
+    }, 100);
+  }
+
+  function pickWinner() {
+    const index = Math.floor(Math.random() * participants.length);
+    const name = participants[index];
+    winner = name;
+    fetch("save_winner.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ winner: name })
     });
-  </script>
-</body>
-</html>
+    showWinner(name);
+  }
+
+  // التشغيل
+  loadWinner().then(() => {
+    loadParticipants().then(() => {
+      fetchDrawTime().then(startInitialCountdown);
+    });
+  });
+</script>
